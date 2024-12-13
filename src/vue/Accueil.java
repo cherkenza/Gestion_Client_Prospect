@@ -24,6 +24,8 @@ public class Accueil extends JFrame {
     private JButton buttonValider;
     private EnumGestion choixGestion;
     private EnumCrud choixCrud;
+    private Societe societe;
+    private EnumProspectInteresse choixProspectInteresse;
 
     public Accueil() {
         setContentPane(contentPane);
@@ -80,6 +82,7 @@ public class Accueil extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 choixCrud = EnumCrud.CREATE;
                 JPanel2.setVisible(false);
+                new Cud(choixGestion, choixCrud, choixProspectInteresse).setVisible(true);
             }
         });
         buttonModifier.addActionListener(new ActionListener() {
@@ -99,6 +102,7 @@ public class Accueil extends JFrame {
                     }
                 }
                 comboBox1.setVisible(true);
+
             }
         });
         buttonSupprimer.addActionListener(new ActionListener() {
@@ -136,6 +140,7 @@ public class Accueil extends JFrame {
                         break;
                 }
                 JPanel3.setVisible(false);
+                new Cud(choixGestion, choixCrud, societe, choixProspectInteresse).setVisible(true);
             }
         });
     }

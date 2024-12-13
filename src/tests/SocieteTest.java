@@ -1,51 +1,65 @@
 package tests;
 
 import entities.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 class SocieteTest {
-    @ParameterizedTest
-    @EmptySource
-    @ValueSource(strings = "xxxxx.xxx")
-    void testMailInvalide(String mailinvalide){
-        assertThrows(GestionException.class, () -> new Client().setEmail(mailinvalide));
+    private Societe societe;
+
+    @BeforeEach
+    void setUp() throws GestionException {
+
+
+        societe = new SocieteTestSet(1, "Test Raison", new Adresse("5", " gigii","58235","kikou"), "0102030405", "test@example.com", "Test commentaire");
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = "xxx@xxx.com")
-    void testMailValide(String mailvalide){
-        assertDoesNotThrow(() -> new Client().setEmail(mailvalide));
-
+    @Test
+    void testSetEmailValid() throws GestionException {
+        societe.setEmail("valid@example.com");
+        assertEquals("valid@example.com", societe.getEmail());
+    }
+    @Test
+    void testSetEmailInvalid() {
+        assertThrows(GestionException.class, () -> {
+            societe.setEmail("invalid-email");
+        });
     }
 
-    @ParameterizedTest
-    @EmptySource
-    @ValueSource(strings = "")
-    void testRaisonSocialeInvalide(String raisonSocialeInvalide){
-       assertThrows(GestionException.class,() -> new Prospect().setRaisonSociale(raisonSocialeInvalide));
-    }
-    @ParameterizedTest
-    @ValueSource(strings = "lidec")
-    void testRaisonSocialeValide(String raisonSocialeValide){
-        assertDoesNotThrow(() -> new Prospect().setRaisonSociale(raisonSocialeValide));
+    @Test
+    void testSetTelephoneValid() throws GestionException {
+        societe.setTelephone("0102030405");
+        assertEquals("0102030405", societe.getTelephone());
     }
 
-    @ParameterizedTest
-    @EmptySource
-    @ValueSource(strings = "9868578545")
-    void testTelephoneInvalide(String telephoneInvalide){
-        assertThrows(GestionException.class, () -> new Client().setTelephone(telephoneInvalide));
+    @Test
+    void testSetTelephoneInvalid() {
+        assertThrows(GestionException.class, () -> {
+            societe.setTelephone("12345");
+        });
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = "+33 07 84 98 68 19")
-    void testTelephoneValide(String telephoneValide){
-        assertDoesNotThrow(() -> new Client().setTelephone(telephoneValide));
+    @Test
+    void testSetRaisonSocialeValid() throws GestionException {
+        societe.setRaisonSociale("New Raison");
+        assertEquals("New Raison", societe.getRaisonSociale());
     }
 
+
+    @Test
+    void testSetRaisonSocialeEmpty() {
+        assertThrows(GestionException.class, () -> {
+            societe.setRaisonSociale("");
+        });
+    }
+
+    @Test
+    void testSetRaisonSocialeDuplicate() throws GestionException {
+        societe= new SocieteTestSet(2, "Test Raison", new Adresse("8", "rirou", "58693","fifou"), "0203040506", "duplicate@example.com", "Another comment");
+        assertThrows(GestionException.class, () -> {
+            societe.setRaisonSociale("Test Raison");
+        });
+    }
 
 }

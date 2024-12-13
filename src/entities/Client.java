@@ -22,6 +22,12 @@ public class Client extends Societe {
         setNombreEmployes(nombreEmployes);
 
     }
+    public static int getCompteur(){
+        return compteur;
+    }
+    public static void incrementeCompteur(){
+        compteur++;
+    }
 
     public long getChiffreAffaires() {
         return chiffreAffaires;

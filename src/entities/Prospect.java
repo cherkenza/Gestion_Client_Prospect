@@ -1,4 +1,6 @@
 package entities;
+import org.w3c.dom.ls.LSOutput;
+
 import static utilitaires.PatternGestion.PATTERN_DATE;
 
 import java.time.LocalDate;
@@ -6,7 +8,7 @@ import java.time.LocalDate;
 public class Prospect extends Societe{
     private static int compteur = 0;
     private LocalDate dateProspection;
-    private String prospectInteresse;
+    private EnumProspectInteresse prospectInteresse;
 
     public Prospect(){}
 
@@ -17,28 +19,31 @@ public class Prospect extends Societe{
 
      */
 
-    public Prospect( String raisonSociale,Adresse adresse, String telephone, String email, String commentaire, LocalDate dateProspection, String prospectInteresse) throws GestionException{
+    public Prospect( String raisonSociale,Adresse adresse, String telephone, String email, String commentaire, LocalDate dateProspection, EnumProspectInteresse prospectInteresse) throws GestionException{
         super(++compteur, raisonSociale,adresse, telephone, email, commentaire);
-        this.dateProspection = dateProspection;
-        this.prospectInteresse = prospectInteresse;
+       setDateProspection(dateProspection);
+       setProspectInteresse(prospectInteresse);
+    }
+    public static int getCompteur() {
+        return compteur;
+    }
+
+    public static void incrementeCompteur(){
+        compteur++;
     }
 
     public LocalDate getDateProspection() {
         return dateProspection;
     }
 
-    public void setDateProspection(LocalDate dateProspection) throws GestionException {
-        if(dateProspection == null || !PATTERN_DATE.format(dateProspection).equals(PATTERN_DATE.format(this.dateProspection))){
-            throw new GestionException(" la date est invalide");
-        }
-        this.dateProspection = dateProspection;
-    }
 
-    public String getProspectInteresse() {
+    public void setDateProspection(LocalDate dateProspection) throws GestionException{    this.dateProspection = dateProspection;}
+
+    public EnumProspectInteresse getProspectInteresse() {
         return prospectInteresse;
     }
 
-    public void setProspectInteresse(String prospectInteresse) {
+    public void setProspectInteresse(EnumProspectInteresse prospectInteresse) {
         this.prospectInteresse = prospectInteresse;
     }
 

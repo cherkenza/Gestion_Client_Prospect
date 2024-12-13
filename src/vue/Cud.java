@@ -4,7 +4,10 @@ import entities.*;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.util.logging.Level;
+import static gestionLog.ExoLogger.logger;
 import static utilitaires.PatternGestion.PATTERN_DATE;
 
 public class Cud extends JFrame {
@@ -47,15 +50,31 @@ public class Cud extends JFrame {
     private EnumProspectInteresse choixProspectInteresse;
     private Societe societe;
 
-    public Cud(EnumGestion choixGestion, EnumCrud choixCrud, EnumProspectInteresse choixProspectInteresse) {
+    public Cud(EnumGestion choixGestion, EnumCrud choixCrud,EnumProspectInteresse choixProspectInteresse) {
         this.choixGestion = choixGestion;
         this.choixCrud = choixCrud;
-        this.choixProspectInteresse = choixProspectInteresse;
         setContentPane(contentPane);
         //setModal(true);
         getRootPane().setDefaultButton(buttonOK);
         initComponents();
+        if(choixGestion == EnumGestion.CLIENT) {
+            Client.incrementeCompteur();
+            textFieldIdentifiant.setText(String.valueOf(Client.getCompteur()));
+            textFieldIdentifiant.setEditable(false);
+        }
+
+        if(choixGestion == EnumGestion.PROSPECT) {
+            Prospect.incrementeCompteur();
+            textFieldIdentifiant.setText(String.valueOf(Prospect.getCompteur()));
+            textFieldIdentifiant.setEditable(false);
+            comboBox2.addItem(EnumProspectInteresse.OUI);
+            comboBox2.addItem(EnumProspectInteresse.NON);
+        }
+
+
         listeners();
+
+
 
     }
 
@@ -67,12 +86,19 @@ public class Cud extends JFrame {
         setContentPane(contentPane);
         getRootPane().setDefaultButton(buttonOK);
         initComponents();
+        textFieldIdentifiant.setText(String.valueOf(societe.getId()));
+        textFieldIdentifiant.setEditable(false);
+        comboBox2.addItem("");
+        comboBox2.addItem(EnumProspectInteresse.OUI);
+        comboBox2.addItem(EnumProspectInteresse.NON);
+        remplissage();
         listeners();
     }
 
     private void initComponents() {
         this.setSize(600, 600);
         if(choixCrud == EnumCrud.CREATE){
+
             créer.setVisible(true);
             modifier.setVisible(false);
             buttonsupprimer.setVisible(false);
@@ -121,15 +147,18 @@ public class Cud extends JFrame {
     }
     private void listeners() {
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
 
-        buttonCancel.addActionListener(new ActionListener() {
+        buttonquitter.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 onCancel();
+            }
+        });
+        buttonretouraccueil.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new Accueil().setVisible(true);
+
             }
         });
 
@@ -177,18 +206,135 @@ public class Cud extends JFrame {
                         societe.setTelephone(textFieldtelephone.getText());
                         societe.setEmail(textFieldemail.getText());
                         ((Prospect) societe).setDateProspection(LocalDate.parse(textFielddateprospection.getText(), PATTERN_DATE));
-                        ((prospect) societe).setEstInteresse(comboBox2.getSelectedItem().toString());
+                        ((Prospect) societe).setProspectInteresse((EnumProspectInteresse) comboBox2.getSelectedItem());
                         Prospects.prospects.add((Prospect) societe);
 
 
                     }
 
-                }catch ()
+                }catch (GestionException eg){
+                    JOptionPane.showMessageDialog(null,  eg.getMessage());
+                }
+                catch (NumberFormatException en){
+                    JOptionPane.showMessageDialog(null, "le nombre d'employés est invalide" + en.getMessage());
+                }
+                catch (DateTimeException ed){
+                    JOptionPane.showMessageDialog(null, "la date est invalide" + ed.getMessage());
+                }
 
+                catch(Exception ee){
+                    JOptionPane.showMessageDialog(null, "Erreur l'application va s'arreter" + ee.getMessage());
+                    logger.log(Level.SEVERE, "Erreur l'application va s'arreter", ee.getMessage());
+                    System.exit(1);
+                }
+                new Liste(choixGestion).setVisible(true);
+            }
+
+
+        });
+
+        modifier.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                choixCrud = EnumCrud.UPDATE;
+                try{
+                    societe.setRaisonSociale(textFieldRaisonsociale.getText());
+                    societe.getAdresse().setNumeroRue(textFieldnumerorue.getText());
+                    societe.getAdresse().setNomRue(textFieldnomrue.getText());
+                    societe.getAdresse().setCodePostal(textFieldcodepostal.getText());
+                    societe.getAdresse().setVille(textFieldville.getText());
+                    societe.setTelephone(textFieldtelephone.getText());
+                    societe.setEmail(textFieldemail.getText());
+                    if(choixGestion == EnumGestion.CLIENT){
+                        ((Client) societe).setChiffreAffaires(Long.parseLong(textFieldchiffreaffaire.getText()));
+                        ((Client) societe).setNombreEmployes(Integer.parseInt(textFieldnombreemployes.getText().toString()));
+                    }
+                    if(choixGestion == EnumGestion.PROSPECT){
+                        ((Prospect) societe).setDateProspection(LocalDate.parse(textFielddateprospection.getText(), PATTERN_DATE));
+                        comboBox2.setSelectedItem(((Prospect) societe).getProspectInteresse().toString());
+                    }
+                }
+                catch (GestionException eg){
+                    JOptionPane.showMessageDialog(null,  eg.getMessage());
+
+                }catch (NumberFormatException en){
+                    JOptionPane.showMessageDialog(null, "le nombre d'employés est invalide" + en.getMessage());
+                }
+                catch (DateTimeException ed){
+                    JOptionPane.showMessageDialog(null, "la date est invalide" + ed.getMessage());
+                }
+
+                catch(Exception ee){
+                    JOptionPane.showMessageDialog(null, "Erreur l'application va s'arreter" + ee.getMessage());
+                    logger.log(Level.SEVERE, "Erreur l'application va s'arreter", ee.getMessage());
+                    System.exit(1);
+                }
+                new Liste(choixGestion).setVisible(true);
 
             }
         });
+
+        buttonsupprimer.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                choixCrud = EnumCrud.DELETE;
+                int choixCinfirmation = JOptionPane.showConfirmDialog(null, "Etes vous sur de la suppression ", "Confirmation", JOptionPane.YES_NO_OPTION);
+                if(choixCinfirmation == JOptionPane.YES_OPTION){
+                    if(choixGestion == EnumGestion.CLIENT){
+                        Clients.clients.remove(societe);
+                    }
+                    if(choixGestion == EnumGestion.PROSPECT){
+                        Prospects.prospects.remove(societe);
+                    }
+                    new Liste(choixGestion).setVisible(true);
+                }
+            }
+        });
+
+
     }
+
+    private void remplissage(){
+        textFieldRaisonsociale.setText(societe.getRaisonSociale());
+        textFieldnumerorue.setText(societe.getAdresse().getNumeroRue());
+        textFieldnomrue.setText(societe.getAdresse().getNomRue());
+        textFieldcodepostal.setText(societe.getAdresse().getCodePostal());
+        textFieldville.setText(societe.getAdresse().getVille());
+        textFieldtelephone.setText(societe.getTelephone());
+        textFieldemail.setText(societe.getEmail());
+
+        if(choixGestion == EnumGestion.CLIENT){
+            textFieldchiffreaffaire.setText(String.valueOf(((Client) societe).getChiffreAffaires()));
+            textFieldnombreemployes.setText(String.valueOf(((Client) societe).getNombreEmployes()));
+            textFielddateprospection.setVisible(false);
+            comboBox2.setVisible(false);
+            dateprospection.setVisible(false);
+            prospectinteresse.setVisible(false);
+        }
+        if(choixGestion == EnumGestion.PROSPECT){
+            textFielddateprospection.setText(String.valueOf(((Prospect) societe).getDateProspection()));
+            comboBox2.setVisible(true);
+            textFieldchiffreaffaire.setVisible(false);
+            textFieldnombreemployes.setVisible(false);
+            chiffreaffaires.setVisible(false);
+            nombremployes.setVisible(false);
+        }
+
+        if(choixCrud == EnumCrud.DELETE){
+            textFieldRaisonsociale.setEditable(false);
+            textFieldnumerorue.setEditable(false);
+            textFieldnomrue.setEditable(false);
+            textFieldcodepostal.setEditable(false);
+            textFieldville.setEditable(false);
+            textFieldtelephone.setEditable(false);
+            textFieldemail.setEditable(false);
+            textFieldchiffreaffaire.setEditable(false);
+            textFieldnombreemployes.setEditable(false);
+            textFielddateprospection.setEditable(false);
+            comboBox2.setEditable(false);
+        }
+    }
+
 
     private void onOK() {
         // add your code here
@@ -199,4 +345,7 @@ public class Cud extends JFrame {
         // add your code here if necessary
         dispose();
     }
+
+
+
 }
